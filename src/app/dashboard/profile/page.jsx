@@ -1,25 +1,15 @@
 'use client'
-import { useState, useEffect } from "react";
-import { signOut, useSession } from 'next-auth/react';
+import { signOut } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
+import { useContext } from 'react';
+import UserDataContext from '@/context/userContext';
 
 import Input from '@/components/Input';
 
 function ProfilePage() {
   const { register, handleSubmit} = useForm();
 
-  const {data: session} = useSession();
-  const [allData, setAllData] = useState();
-
-  useEffect(() => {
-    const getUser = async () => {
-      const res = await fetch(`/api/users/${session?.user.name}`);
-      const resJson = await res.json();
-      if (resJson.id) setAllData(resJson);
-    }
-    getUser();
-
-  },[session?.user.name]);
+  const { userData } = useContext(UserDataContext);
 
   const onSubmit = handleSubmit(async (data) => {
     if (data.password !== data.confirmpassword) {
@@ -31,7 +21,7 @@ function ProfilePage() {
 
     if (data.email === "" && data.name === "" && data.password === "" && data.username === "") return;
 
-    const res = await fetch(`/api/users/${session?.user.name}`, {
+    const res = await fetch(`/api/${userData?.id}`, {
       method: 'PUT',
       body: JSON.stringify({
         name: data.name,
@@ -53,8 +43,8 @@ function ProfilePage() {
     <main>
       <article className="p-8 flex justify-between">
         <div className="flex items-baseline gap-1">
-          <h1 className="text-4xl font-black text-balance">{session?.user.name}</h1>
-          <span className="text-slate-300">Id #{allData?.id}</span>
+          <h1 className="text-4xl font-black text-balance">@{userData?.userName}</h1>
+          <span className="text-slate-300">Id #{userData?.id}</span>
         </div>
         <button 
           onClick={() => signOut()} 
@@ -67,25 +57,25 @@ function ProfilePage() {
 
       <article>
         {
-          allData &&
+          userData &&
           <section>
             <form className=" m-auto w-full sm:w-2/4 p-4" onSubmit={onSubmit}>
               <fieldset className="flex flex-col gap-1">
                 <Input 
                   title="Name" 
-                  props={{type: "text", placeholder: allData?.name}}
+                  props={{type: "text", placeholder: userData?.name}}
                   register={{...register("name")}}
                 ></Input>
 
                 <Input 
                   title="User Name" 
-                  props={{type: "text", placeholder: allData?.userName}}
+                  props={{type: "text", placeholder: userData?.userName}}
                   register={{...register("username")}}
                 ></Input>
 
                 <Input 
                   title="Email" 
-                  props={{type: "email", placeholder: allData?.email}}
+                  props={{type: "email", placeholder: userData?.email}}
                   register={{...register("email")}}
                 ></Input>
 

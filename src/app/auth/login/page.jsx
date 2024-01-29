@@ -12,7 +12,6 @@ function PageLogin() {
   const { register, handleSubmit, formState: {errors}} = useForm();
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log(data);
     const res = await signIn('credentials', {
       email: data.email,
       password: data.password,
@@ -27,8 +26,6 @@ function PageLogin() {
       router.push('/dashboard');
       router.refresh();
     }
-
-    console.log(res);
   });
 
   return ( 

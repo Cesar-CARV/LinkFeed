@@ -1,11 +1,14 @@
 'use client'
 import { SessionProvider } from 'next-auth/react';
+import { UserDataProvider } from '@/context/userContext';
 
 function Layout({children}) {
   return ( 
     <>
       <SessionProvider>
-        {children}
+        <UserDataProvider>
+          {children}
+        </UserDataProvider>
       </SessionProvider>
     </>
   );

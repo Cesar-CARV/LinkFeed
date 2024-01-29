@@ -1,26 +1,16 @@
 'use client'
 import { useSession } from 'next-auth/react';
-import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useState, useEffect, useContext } from 'react';
+import UserDataContext from '@/context/userContext';
+
 import Input from '@/components/Input';
 
 function DashboardPage() {
-  const {data: session} = useSession();
-  const [data, setData] = useState();
+  const { userData } = useContext(UserDataContext);
+
   const [showForm, setShowForm] = useState(false);
-
   const { register, handleSubmit, formState: {errors}} = useForm();
-
-  useEffect(() => {
-
-    const getUser = async () => {
-      const res = await fetch(`/api/users/${session?.user.name}`);
-      const resJson = await res.json();
-      if (resJson .id) setData(resJson);
-    }
-    getUser();
-
-  },[session?.user.name]);
 
   const onSubmit = handleSubmit(data => {
     console.log(data);
@@ -30,15 +20,15 @@ function DashboardPage() {
     <main>
       <article>
         <section className="p-8 flex justify-between">
-          <h1 className="text-4xl font-black text-balance">{data?.session?.user.name}</h1>
+          <h1 className="text-4xl font-black text-balance">@{userData?.userName}</h1>
         </section>
       </article>
       <article className='m-auto w-2/5 flex flex-col gap-2 justify-center items-center'>
         <section className="w-full mt-4">
           <ul>
             {
-              data &&
-              data.links.map(link => 
+              userData &&
+              userData.links.map(link => 
                 <li key={link.id} className="mb-2">
                   <a href={link.url} target="_blank" className="p-4 bg-slate-100 inline-block w-full text-center rounded-lg hover:bg-slate-200 border-2">{link.urlName}</a>
                 </li>

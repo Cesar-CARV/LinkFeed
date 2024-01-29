@@ -4,12 +4,14 @@ import Image from 'next/image';
 
 function PageUserTree({params}) {
   const [data, setData] = useState();
-
+  
   useEffect(() => {
+    const name = params.userName;
+
     const getUser = async () => {
-      const res = await fetch(`/api/users/${params.userName}`);
+      const res = await fetch(`/api/users/${name}`);
       const data = await res.json();
-      console.log(data)
+      console.log(data);
       setData(data);
     }
     getUser();
@@ -31,7 +33,7 @@ function PageUserTree({params}) {
               <figure className="bg-white rounded-full overflow-hidden w-36">
                 <Image src='/any&yo.png' alt="avatar" width={394} height={80} className="object-cover w-full aspect-square"></Image>
               </figure>
-              <h1 className="text-4xl font-black text-balance">
+              <h1 className="text-4xl font-black text-pretty text-center">
                 @{data && data.userName}
               </h1>
             </section>
