@@ -1,82 +1,139 @@
 'use client'
-import { useSession } from 'next-auth/react';
-import { useForm } from 'react-hook-form';
-import { useState, useEffect, useContext } from 'react';
+import { useState, useContext } from 'react';
+import { useRouter } from 'next/navigation';
 import UserDataContext from '@/context/userContext';
 
-import Input from '@/components/Input';
+import LinkItemProfile from '@/components/LinkItemProfile';
+import Button from '@/components/Button';
+import FormAddLink from '@/components/FormAddLink';
+import UserHeader from '@/components/UserHeader';
 
 function DashboardPage() {
-  const { userData } = useContext(UserDataContext);
+  const { userData, updateData } = useContext(UserDataContext);
 
+  const METHODS = {POST:"POST", PUT:"PUT", DELETE:"DELETE"};
+
+  const [linkInfo, setLinkInfo] = useState(null);
+  const [method, setMethod] = useState(METHODS.POST);
   const [showForm, setShowForm] = useState(false);
-  const { register, handleSubmit, formState: {errors}} = useForm();
+  const router = useRouter();
 
-  const onSubmit = handleSubmit(data => {
-    console.log(data);
-  });
+  const onSubmitPOST = async (data) => {
+    if (!data.url.includes("https://") && !data.url.includes("http://")){
+      alert("Add 'https://' to link");
+      return;
+    }
+    const res = await fetch(`/api/${userData.id}/link`, {
+      method: "POST",
+      body: JSON.stringify({
+        userId: userData.id,
+        urlName: data.urlName,
+        url: data.url,
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (res.ok) {
+      updateData(userData.id);
+      setShowForm(false);
+    }
+  }
+
+  const onSubmitPUT = async (data) => {
+    if (!data.url.includes("https://") && !data.url.includes("http://")){
+      alert("Add 'https://' to link");
+      return;
+    }
+    const res = await fetch(`/api/${userData.id}/link`, {
+      method: "PUT",
+      body: JSON.stringify({
+        id: linkInfo?.id,
+        urlName: data.urlName,
+        url: data.url,
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (res.ok) {
+      updateData(userData.id);
+      setMethod(METHODS.POST);
+      setShowForm(false);
+    }
+  }
+
+  const onSubmitDELTE = async (id) => {
+    const res = await fetch(`/api/${userData.id}/link`, {
+      method: "DELETE",
+      body: JSON.stringify({
+        id: id
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (res.ok) {
+      updateData(userData.id);
+      setMethod(METHODS.POST);
+    }
+  }
+
+  const onSubmit = (data) => {
+    if (method === METHODS.POST) onSubmitPOST(data);
+    if (method === METHODS.PUT) onSubmitPUT(data);
+    //if (method === METHODS.DELETE) onSubmitDELTE();
+  };
+
+  const editLink = (id, url, urlName) => {
+    setLinkInfo({id, urlName, url});
+    setMethod(METHODS.PUT);
+    setShowForm(true);
+  }
+
+  const deleteLink = (id) => {
+    setMethod(METHODS.DELETE);
+    onSubmitDELTE(id)
+  }
 
   return ( 
     <main>
       <article>
-        <section className="p-8 flex justify-between">
-          <h1 className="text-4xl font-black text-balance">@{userData?.userName}</h1>
-        </section>
+        <UserHeader name={userData?.userName} id={userData?.id}>
+          <Button type="button" color="gray" onClick={() => router.push("/watch/" + userData.userName)}>
+            <i className='bx bx-show'></i>
+            <span>Preview</span>
+          </Button>
+        </UserHeader>
       </article>
-      <article className='m-auto w-2/5 flex flex-col gap-2 justify-center items-center'>
+      <article className='md:m-auto md:w-2/5 md:p-0 w-full p-4 flex flex-col gap-2 justify-center items-center'>
         <section className="w-full mt-4">
           <ul>
             {
               userData &&
               userData.links.map(link => 
                 <li key={link.id} className="mb-2">
-                  <a href={link.url} target="_blank" className="p-4 bg-slate-100 inline-block w-full text-center rounded-lg hover:bg-slate-200 border-2">{link.urlName}</a>
+                  <LinkItemProfile id={link.id} urlName={link.urlName} url={link.url} editFunc={editLink} deleteFunc={deleteLink}>
+                    <span>{link.urlName}</span>
+                  </LinkItemProfile>
                 </li>
               )
             }
           </ul>
-          <div>
-            <button 
-              onClick={()=> setShowForm(!showForm)}
-              className="p-2 w-full text-center text-slate-50 hover:bg-slate-900 bg-slate-950 rounded-lg flex items-center justify-center gap-2"
-            >
+          <div className="flex justify-center">
+            <Button type="submit" color="black" onClick={()=> {setShowForm(!showForm); setMethod(METHODS.POST); setLinkInfo(null)}}>
               <span>{!showForm ? "Add new Link" : "Cancel"}</span>
-            </button>
+            </Button>
           </div>
         </section>
         <section className={`w-full ${!showForm && "hidden" }`}>
-          <form className="w-full" onSubmit={onSubmit}>
-            <fieldset className="flex flex-col gap-1">
-              <Input 
-                title="Url Name" 
-                props={{type: "text", placeholder: "Click here and make magic "}}
-                register={{...register("urlName", {
-                  required: {
-                    value: true,
-                    message: "The name is required"
-                  }
-                })}}
-                error={errors.urlName ? errors.urlName.message : ''}
-              ></Input>
-
-              <Input 
-                title="Url" 
-                props={{type: "text", placeholder: "Url (• o • )"}}
-                register={{...register("url", {
-                  required: {
-                    value: true,
-                    message: "Url es required"
-                  }
-                })}}
-                error={errors.url ? errors.url.message : ''}
-              ></Input>
-            </fieldset>
-            <div className="flex gap-2 mt-1">
-              <button type="submit"  className="p-2 text-slate-50 hover:bg-slate-900 bg-slate-950 rounded-lg flex items-center justify-between gap-2">
-                <span>Add link</span>
-              </button>
-            </div>
-          </form>
+          {
+            (method === METHODS.POST || method === METHODS.PUT) &&
+            <FormAddLink onSubmit={onSubmit} info={linkInfo}/>
+          }
         </section>
       </article>
     </main>

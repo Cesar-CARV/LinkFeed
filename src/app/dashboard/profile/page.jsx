@@ -5,6 +5,8 @@ import { useContext } from 'react';
 import UserDataContext from '@/context/userContext';
 
 import Input from '@/components/Input';
+import Button from '@/components/Button';
+import UserHeader from '@/components/UserHeader';
 
 function ProfilePage() {
   const { register, handleSubmit} = useForm();
@@ -41,24 +43,18 @@ function ProfilePage() {
 
   return ( 
     <main>
-      <article className="p-8 flex justify-between">
-        <div className="flex items-baseline gap-1">
-          <h1 className="text-4xl font-black text-balance">@{userData?.userName}</h1>
-          <span className="text-slate-300">Id #{userData?.id}</span>
-        </div>
-        <button 
-          onClick={() => signOut()} 
-          className='p-2 text-white hover:bg-red-700 bg-red-500 rounded-lg flex items-center justify-between gap-2'
-        >
-          <i className='bx bx-exit'></i>
-          <span>Sign out</span>
-        </button>
+      <article>
+        <UserHeader name={userData?.userName} id={userData?.id}>
+          <Button type="button" color="red" onClick={() => signOut()}>
+            <i className='bx bx-exit'></i>
+            <span>Sign out</span>
+          </Button>
+        </UserHeader>
       </article>
-
       <article>
         {
           userData &&
-          <section>
+          <section className='w-full mt-4'>
             <form className=" m-auto w-full sm:w-2/4 p-4" onSubmit={onSubmit}>
               <fieldset className="flex flex-col gap-1">
                 <Input 
@@ -92,21 +88,21 @@ function ProfilePage() {
                 ></Input>
               </fieldset>
               <div className="flex gap-2 mt-4">
-                <button type="submit"  className="p-2 text-slate-50 hover:bg-slate-900 bg-slate-950 rounded-lg flex items-center justify-between gap-2">
+                <Button type="submit" color="black">
                   <span>Save changes</span>
-                </button>
-                <button type="reset"  className="p-2 text-slate-950 hover:bg-slate-100 border border-slate-950 rounded-lg flex items-center justify-between gap-2">
+                </Button>
+                <Button type="reset" color="gray">
                   <span>Cancel</span>
-                </button>
+                </Button>
               </div>
             </form>
           </section>
         }
       </article>
       <article className="flex justify-center items-center m-auto w-full sm:w-2/4 py-8 px-4">
-        <button type="button"  className="p-2 text-white hover:bg-red-700 bg-red-500 rounded-lg flex items-center justify-center gap-2 w-full">
+        <Button type="button" color="red">
           <span>Delete account</span>
-        </button>
+        </Button>
       </article>
       
     </main>

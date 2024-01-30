@@ -7,20 +7,23 @@ function UserDataProvider({children}) {
   const [userData, setUserData] = useState();
   const {data: session} = useSession();
 
+  const getAllDataUser = async (id) => {
+    const res = await fetch(`/api/${id}`);
+    const resJson = await res.json();
+
+    if (res.ok) setUserData(resJson);
+  }
+
+  const getUser = async () => {
+    const res = await fetch(`/api/users/${session?.user.name}`);
+    const resJson = await res.json();
+    if (resJson?.id) {
+      getAllDataUser(resJson.id);
+    }
+  }
+
   useEffect(() => {
-    const getAllDataUser = async (id) => {
-      const res = await fetch(`/api/${id}`);
-      const resJson = await res.json();
-
-      if (res.ok) setUserData(resJson);
-    }
-
-    const getUser = async () => {
-      const res = await fetch(`/api/users/${session?.user.name}`);
-      const resJson = await res.json();
-      if (resJson?.id) getAllDataUser(resJson.id);
-      
-    }
+    if (userData) return;
     getUser();
 
   },[session?.user.name && userData === undefined]);
@@ -29,6 +32,7 @@ function UserDataProvider({children}) {
     <UserDataContext.Provider
       value={{
         session: session?.user,
+        updateData: getAllDataUser,
         userData,
         setUserData
       }}

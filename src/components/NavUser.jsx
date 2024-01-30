@@ -1,6 +1,7 @@
 import Link from 'next/link'
-
+  
 function NavUser() {
+
   return ( 
     <nav>
       <ul className='flex gap-2'>

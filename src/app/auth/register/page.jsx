@@ -1,7 +1,8 @@
 'use client'
 import { useRouter } from 'next/navigation';
-import Input from "@/components/Input";
 import { useForm } from 'react-hook-form';
+import Input from "@/components/Input";
+import Button from '@/components/Button';
 
 function RegisterPage() {
   const router = useRouter();
@@ -101,9 +102,12 @@ function RegisterPage() {
 
         </fieldset>
         <div className="flex gap-2 mt-1">
-          <button type="submit"  className="p-2 text-slate-50 hover:bg-slate-900 bg-slate-950 rounded-lg flex items-center justify-between gap-2">
+          <Button type="submit" color="black">
             <span>Register</span>
-          </button>
+          </Button>
+          <Button type="reset" color="gray">
+            <span>Cancel</span>
+          </Button>
         </div>
       </form>
 

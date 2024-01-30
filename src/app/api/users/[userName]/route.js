@@ -13,5 +13,6 @@ export async function GET(req, {params}) {
             links: true
         }
     });
+    console.log(user);
     return NextResponse.json(user);
 }

@@ -27,8 +27,27 @@ export async function GET(req, {params}) {
 
 export async function PUT(req, {params}) {
     try {
+        const reqData = await req.json();
+        // Eliminar los valores bacios del objeto
+        const newData = Object.fromEntries(Object.entries(reqData).filter(([_, v]) => v != null && v !== ''));
+
+        // si se va a cambiar la contraseña la encripta antes de guardarla en la db
+        if (newData.password) {
+            newData.password = await bcrypt.hash(newData.password, 10);
+        }
+
+        const user = await prisma.user.update({
+            where: {
+                id: Number(params.userId)
+            },
+            data: newData
+        });
         
-        return NextResponse.json({message: "PUT"});
+        if (!user) return NextResponse.json({message: "The user does not exist"});
+        
+
+        const { password:_, ...userData } =  user;
+        return NextResponse.json(userData);
     } catch (error) {
         return NextResponse.json({message: error.message});
     }
